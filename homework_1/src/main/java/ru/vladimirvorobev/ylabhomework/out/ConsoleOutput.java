@@ -31,7 +31,7 @@ public class ConsoleOutput {
      **/
     public void authorisationMessage() {
         System.out.println("______________");
-        System.out.println("Authorisation");
+        System.out.println("Authorization");
     }
 
     /**
