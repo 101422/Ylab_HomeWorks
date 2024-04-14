@@ -4,9 +4,9 @@
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
-import ru.vladimirvorobev.ylabhomework.dao.TrainingDAO;
-import ru.vladimirvorobev.ylabhomework.dao.TrainingTypeDAO;
+import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingTypeDAOImpl;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
@@ -14,7 +14,6 @@ import ru.vladimirvorobev.ylabhomework.services.TrainingService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.vladimirvorobev.ylabhomework.security.Role.ROLE_USER;
 
@@ -36,33 +35,33 @@ public class UnitTest {
   }
 
   @InjectMocks
-  private Person personTest = new Person(1, "personName", "1", ROLE_USER);
-  private TrainingType trainingTypeTest = new TrainingType(1, "TrainingType1"); // mocking this class// mocking this class
-  private Training trainingTest = new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"),  trainingTypeTest, 10, 1000, additionalInformation); // mocking this class// mocking this class
+  private Person personTest = new Person("personName", "1", ROLE_USER);
+  private TrainingType trainingTypeTest = new TrainingType("TrainingType1"); // mocking this class// mocking this class
+  private Training trainingTest = new Training(personTest, java.sql.Date.valueOf("2021-01-01"),  trainingTypeTest, 10, 1000, additionalInformation); // mocking this class// mocking this class
 
   @Test
   public void should_find_no_trainings_if_repository_is_empty() {
     TrainingService trainingService = new TrainingService();
 
-    List<Training> tutorials = trainingService.showAllTrainings();
+    List<Training> tutorials = trainingService.findAllTrainings();
 
     assert(tutorials).isEmpty();
   }
 
   @Test
   public void should_create_a_training() {
-    TrainingDAO trainingDAO         = new TrainingDAO();
-    TrainingTypeDAO trainingTypeDAO = new TrainingTypeDAO();
-    PersonDAO personDAO             = new PersonDAO();
+    TrainingDAOImpl trainingDAOImpl = new TrainingDAOImpl();
+    TrainingTypeDAOImpl trainingTypeDAOImpl = new TrainingTypeDAOImpl();
+    PersonDAOImpl personDAOImpl = new PersonDAOImpl();
     TrainingService trainingService = new TrainingService();
 
-    personDAO.save(personTest);
+    personDAOImpl.save(personTest);
 
-    trainingTypeDAO.save(trainingTypeTest);
+    trainingTypeDAOImpl.save(trainingTypeTest);
 
     trainingService.createTraining("personName", java.sql.Date.valueOf("2021-01-01"), "TrainingType1", 10, 1000, additionalInformation);
 
-    List<Training> foundedTrainings = trainingDAO.getTrainingsByPerson(personDAO.getPersonByName("personName"));
+    List<Training> foundedTrainings = trainingDAOImpl.findByPerson(personDAOImpl.findByName("personName"));
 
     Training foundedTraining = foundedTrainings.get(0);
 
@@ -77,11 +76,11 @@ public class UnitTest {
   @Test
   public void should_find_all_trainings() {
     TrainingService trainingService = new TrainingService();
-    TrainingDAO trainingDAO         = new TrainingDAO();
+    TrainingDAOImpl trainingDAOImpl = new TrainingDAOImpl();
 
-    trainingDAO.save(trainingTest);
+    trainingDAOImpl.save(trainingTest);
 
-    List<Training> trainings = trainingService.showAllTrainings();
+    List<Training> trainings = trainingService.findAllTrainings();
 
     assertEquals(trainings.size(),1);
 
@@ -91,17 +90,17 @@ public class UnitTest {
   @Test
   public void should_update_training_by_id() {
     TrainingService trainingService  = new TrainingService();
-    PersonDAO personDAO              = new PersonDAO();
-    TrainingDAO trainingDAO          = new TrainingDAO();
-    TrainingTypeDAO trainingTypeDAO  = new TrainingTypeDAO();
+    PersonDAOImpl personDAOImpl = new PersonDAOImpl();
+    TrainingDAOImpl trainingDAOImpl = new TrainingDAOImpl();
+    TrainingTypeDAOImpl trainingTypeDAOImpl = new TrainingTypeDAOImpl();
 
-    personDAO.save(personTest);
-    trainingDAO.save(trainingTest);
-    trainingTypeDAO.save(trainingTypeTest);
+    personDAOImpl.save(personTest);
+    trainingDAOImpl.save(trainingTest);
+    trainingTypeDAOImpl.save(trainingTypeTest);
 
     trainingService.updateTraining(1, "personName", java.sql.Date.valueOf("2021-02-02"), "TrainingType1", 20,  2000, additionalInformation);
 
-    Training foundedTraining = trainingDAO.getTrainingById(1);
+    Training foundedTraining = trainingDAOImpl.findById(1);
 
     assertEquals(foundedTraining.getDate(), java.sql.Date.valueOf("2021-02-02"));
     assertEquals(foundedTraining.getDuration(), 20);
@@ -112,13 +111,13 @@ public class UnitTest {
   @Test
   public void should_delete_training_by_id() {
     TrainingService trainingService = new TrainingService();
-    TrainingDAO trainingDAO         = new TrainingDAO();
+    TrainingDAOImpl trainingDAOImpl = new TrainingDAOImpl();
 
-    trainingDAO.save(trainingTest);
+    trainingDAOImpl.save(trainingTest);
 
-    trainingService.delete(1);
+    trainingService.deleteTraining(1);
 
-    List<Training> trainings = trainingService.showAllTrainings();
+    List<Training> trainings = trainingService.findAllTrainings();
 
     assertEquals(trainings.size(),0);
   }

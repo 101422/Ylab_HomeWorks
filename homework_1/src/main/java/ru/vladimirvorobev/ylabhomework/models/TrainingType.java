@@ -3,6 +3,7 @@ package ru.vladimirvorobev.ylabhomework.models;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Сущность типа тренировкок.
@@ -10,22 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class TrainingType {
 
-    private int id;
     private String name;
-
-    /**
-     * Получение представления сущности типа тренировкок.
-     *
-     * @return представление сущности типа тренировок.
-     **/
-    @Override
-    public String toString() {
-        return "TrainingType {" +
-                "id = " + id +
-                ", name = " + name +
-                '}';
-    }
 
 }

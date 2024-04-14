@@ -7,9 +7,7 @@ import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.out.ConsoleOutput;
 import ru.vladimirvorobev.ylabhomework.security.AuthorizationService;
 import ru.vladimirvorobev.ylabhomework.services.TrainingService;
-
 import java.util.*;
-
 import static java.util.stream.Collectors.groupingBy;
 
 /**
@@ -85,7 +83,7 @@ public class ConsoleInput {
                         else if (enteredString2.equals("types")) {
                             // Вывод типов тренировок.
 
-                            trainingService.showAllTrainingTypes().forEach(System.out::println);
+                            trainingService.findAllTrainingTypes().forEach(System.out::println);
                         }
                         else if (enteredString2.equals("training")) {
                             // Создание тренировки.
@@ -147,28 +145,31 @@ public class ConsoleInput {
                         else if (enteredString2.equals("trainings")) {
                             // Вывод тренировок пользователя.
 
-                            trainingService.showTrainingsByPersonName(name).forEach(System.out::println);
+                            consoleOutput.printTrainingsByPersonName(trainingService, name);
+
                         }
                         else if (isAdmin && enteredString2.equals("trainingsAll")) {
                             // Вывод всех тренировок.
 
-                            trainingService.showAllTrainings().forEach(System.out::println);
+                            consoleOutput.printAllTrainings(trainingService);
+
                         }
                         else if (enteredString2.equals("byDate")) {
                             // Вывод тренировок пользователя с сортировкой по дате.
 
-                            List<Training> trainings = trainingService.showTrainingsByPersonName(name);
+                            List<Training> trainings = trainingService.findTrainingsByPersonName(name);
 
                             trainings.sort(Comparator.comparing(Training::getDate));
 
-                            trainings.forEach(System.out::println);
+                            consoleOutput.printTrainings(trainings);
+
                         }
                         else if (enteredString2.equals("edit")) {
                             // Редактирование тренировок пользователя.
 
                             consoleOutput.yourTrainingsMessage();
 
-                            trainingService.showTrainingsByPersonName(name).forEach(System.out::println);
+                            consoleOutput.printTrainingsByPersonName(trainingService, name);
 
                             consoleOutput.trainingEditMessage();
 
@@ -235,7 +236,7 @@ public class ConsoleInput {
 
                             consoleOutput.deleteStartMessage();
 
-                            trainingService.showTrainingsByPersonName(name).forEach(System.out::println);
+                            consoleOutput.printTrainingsByPersonName(trainingService, name);
 
                             consoleOutput.deleteIdMessage();
 
@@ -243,7 +244,7 @@ public class ConsoleInput {
 
                             int id = console7.nextInt();
 
-                            trainingService.delete(id);
+                            trainingService.deleteTraining(id);
 
                             logger.info("Deleted training by user " + name);
                         }
@@ -252,14 +253,14 @@ public class ConsoleInput {
 
                             consoleOutput.statsStartMessage();
 
-                            List<Training> trainingsByPersonName = trainingService.showTrainingsByPersonName(name);
+                            List<Training> trainingsByPersonName = trainingService.findTrainingsByPersonName(name);
 
                             // Группировка по дате и вывод суммы калорий по каждой дате.
 
                             Map<Date, List<Training>> mapOfTrainingsByPersonName= trainingsByPersonName.stream()
                                     .collect(groupingBy(Training::getDate));
 
-                            consoleOutput.statsPrint(mapOfTrainingsByPersonName);
+                            consoleOutput.printStats(mapOfTrainingsByPersonName);
 
                             logger.info("Showed stats of user " + name);
                         }

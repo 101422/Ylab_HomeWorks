@@ -1,12 +1,11 @@
 package ru.vladimirvorobev.ylabhomework.services;
 
-import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
-import ru.vladimirvorobev.ylabhomework.dao.TrainingDAO;
-import ru.vladimirvorobev.ylabhomework.dao.TrainingTypeDAO;
+import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingTypeDAOImpl;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
-
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,14 +15,14 @@ import java.util.List;
  **/
 public class TrainingService {
 
-    private TrainingDAO trainingDAO;
-    private TrainingTypeDAO trainingTypeDAO;
-    private PersonDAO personDAO;
+    private TrainingDAOImpl trainingDAOImpl;
+    private TrainingTypeDAOImpl trainingTypeDAOImpl;
+    private PersonDAOImpl personDAOImpl;
 
     public TrainingService(){
-        this.trainingDAO = new TrainingDAO();
-        this.trainingTypeDAO = new TrainingTypeDAO();
-        this.personDAO = new PersonDAO();
+        this.trainingDAOImpl = new TrainingDAOImpl();
+        this.trainingTypeDAOImpl = new TrainingTypeDAOImpl();
+        this.personDAOImpl = new PersonDAOImpl();
     }
 
     /**
@@ -32,7 +31,7 @@ public class TrainingService {
      * @param trainingTypeName имя типа тренировкок
      **/
     public void createTrainingType(String trainingTypeName) {
-        trainingTypeDAO.save(new TrainingType(++TrainingTypeDAO.TRAINING_TYPES_COUNT, trainingTypeName));
+        trainingTypeDAOImpl.save(new TrainingType(trainingTypeName));
     }
 
     /**
@@ -40,8 +39,8 @@ public class TrainingService {
      *
      * @return список всех типов тренировок
      **/
-    public List<TrainingType> showAllTrainingTypes(){
-        return trainingTypeDAO.showAll();
+    public List<TrainingType> findAllTrainingTypes(){
+        return trainingTypeDAOImpl.findAll();
     }
 
     /**
@@ -49,8 +48,8 @@ public class TrainingService {
      *
      * @return список всех тренировок
      **/
-    public List<Training> showAllTrainings(){
-        return trainingDAO.showAll();
+    public List<Training> findAllTrainings(){
+        return trainingDAOImpl.findAll();
     }
 
     /**
@@ -59,10 +58,10 @@ public class TrainingService {
      * @param personName имя пользователя
      * @return список тренировок пользователя
      **/
-    public List<Training> showTrainingsByPersonName(String personName){
-        Person person = personDAO.getPersonByName(personName);
+    public List<Training> findTrainingsByPersonName(String personName){
+        Person person = personDAOImpl.findByName(personName);
 
-        return trainingDAO.getTrainingsByPerson(person);
+        return trainingDAOImpl.findByPerson(person);
     }
 
     /**
@@ -73,8 +72,8 @@ public class TrainingService {
      * @param date дата
      * @return список тренировок с отбором по пользователю, типу тренировки и дате.
      **/
-    public List<Training> showTrainingsByPersonTypeDate(Person person, TrainingType trainingType, Date date){
-        return trainingDAO.getTrainingsByPersonTypeDate(person, trainingType, date);
+    public List<Training> findTrainingsByPersonTypeDate(Person person, TrainingType trainingType, Date date){
+        return trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
     }
 
 
@@ -89,7 +88,7 @@ public class TrainingService {
      * @param additionalInformation список из Map с дополнительными сведениями о тренировке
      **/
     public void createTraining(String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) {
-        Person person = personDAO.getPersonByName(personName);
+        Person person = personDAOImpl.findByName(personName);
 
         if (person == null){
             System.out.println("Person with name " + personName + " wasn't found!");
@@ -97,7 +96,7 @@ public class TrainingService {
             return;
         }
 
-        TrainingType trainingType = trainingTypeDAO.getTrainingTypeByName(trainingTypeName);
+        TrainingType trainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
 
         if (trainingType == null){
             System.out.println("Training type with name " + trainingTypeName + " wasn't found!");
@@ -105,15 +104,15 @@ public class TrainingService {
             return;
         }
 
-        if (showTrainingsByPersonTypeDate(person, trainingType, date).size() > 0) {
+        if (findTrainingsByPersonTypeDate(person, trainingType, date).size() > 0) {
             System.out.println("You have already created training of type: " + trainingTypeName + " in this date: " + date + "!");
 
             return;
         }
 
-        Training training = new Training(++TrainingDAO.TRAININGS_COUNT ,person, date, trainingType, duration, amountOfCalories, additionalInformation);
+        Training training = new Training(person, date, trainingType, duration, amountOfCalories, additionalInformation);
 
-        trainingDAO.save(training);
+        trainingDAOImpl.save(training);
 
         System.out.println("Created training:");
 
@@ -132,9 +131,9 @@ public class TrainingService {
      * @param additionalInformation список из Map с дополнительными сведениями о тренировке
      **/
     public void updateTraining(int id, String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) {
-        Training training = trainingDAO.getTrainingById(id);
+        Training training = trainingDAOImpl.findById(id);
 
-        Person person = personDAO.getPersonByName(personName);
+        Person person = personDAOImpl.findByName(personName);
 
         if (person == null){
             System.out.println("Person with name " + personName + " wasn't found!");
@@ -142,7 +141,7 @@ public class TrainingService {
             return;
         }
 
-        TrainingType trainingType = trainingTypeDAO.getTrainingTypeByName(trainingTypeName);
+        TrainingType trainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
 
         if (trainingType == null){
             System.out.println("Training type with name " + trainingTypeName + " wasn't found!");
@@ -157,7 +156,7 @@ public class TrainingService {
         training.setAmountOfCalories(amountOfCalories);
         training.setAdditionalInformation(additionalInformation);
 
-        trainingDAO.update(id , training);
+        trainingDAOImpl.update(id , training);
 
         System.out.println("Updated training:");
 
@@ -169,6 +168,6 @@ public class TrainingService {
      *
      * @param id
      **/
-    public void delete(int id) { trainingDAO.delete(id); }
+    public void deleteTraining(int id) { trainingDAOImpl.delete(id); }
 
 }

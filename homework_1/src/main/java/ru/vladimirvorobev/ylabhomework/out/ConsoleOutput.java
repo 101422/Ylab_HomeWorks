@@ -1,10 +1,12 @@
 package ru.vladimirvorobev.ylabhomework.out;
 
 import ru.vladimirvorobev.ylabhomework.models.Training;
-
+import ru.vladimirvorobev.ylabhomework.services.TrainingService;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Вывод данных в консоль.
  **/
@@ -181,9 +183,57 @@ public class ConsoleOutput {
      * @param mapOfTrainingsByPersonName результат группировки тренировок по дате.
      *
      **/
-    public void statsPrint(Map<Date, List<Training>> mapOfTrainingsByPersonName) {
+    public void printStats(Map<Date, List<Training>> mapOfTrainingsByPersonName) {
         mapOfTrainingsByPersonName.forEach((key, value) ->
                 System.out.println(key + " - " +  value.stream().mapToInt(Training::getAmountOfCalories).sum()+ " calories"));
     }
+
+    /**
+     * Вывод трениковок пользователя.
+     *
+     * @param trainingService экземпляр TrainingService
+     * @param name имя пользователя
+     *
+     **/
+    public void printTrainingsByPersonName(TrainingService trainingService, String name){
+
+        AtomicInteger i = new AtomicInteger(1);
+
+        trainingService.findTrainingsByPersonName(name).forEach( (trainings) -> {
+
+                    System.out.println(i + ": " + trainings);
+                    i.getAndIncrement();
+                }
+        );
+    }
+
+    /**
+     * Вывод всех тренировок для администратора.
+     *
+     * @param trainingService экземпляр TrainingService
+     *
+     **/
+    public void printAllTrainings(TrainingService trainingService){
+
+        AtomicInteger i = new AtomicInteger(1);
+
+        trainingService.findAllTrainings().forEach( (trainings) -> {
+
+                    System.out.println(i + ": " + trainings);
+                    i.getAndIncrement();
+                }
+        );
+    }
+
+    /**
+     * Вывод переданных тренировок для администратора.
+     *
+     * @param trainings список тренировок
+     *
+     **/
+    public void printTrainings(List<Training> trainings){
+        trainings.forEach(System.out::println);
+    }
+
 
 }

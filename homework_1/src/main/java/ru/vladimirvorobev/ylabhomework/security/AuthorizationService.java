@@ -1,18 +1,17 @@
 package ru.vladimirvorobev.ylabhomework.security;
 
-import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
+import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
 import ru.vladimirvorobev.ylabhomework.models.Person;
-
 import java.util.HashMap;
 /**
  * Сервис авторизации пользователя.
  **/
 public class AuthorizationService {
 
-    private PersonDAO personDAO;
+    private PersonDAOImpl personDAOImpl;
 
     public AuthorizationService(){
-        this.personDAO = new PersonDAO();
+        this.personDAOImpl = new PersonDAOImpl();
     }
 
     /**
@@ -22,7 +21,7 @@ public class AuthorizationService {
      * @param password пароль
      **/
     public void registration(String name, String password) {
-        personDAO.save(new Person(++PersonDAO.PERSONS_COUNT, name, password,  Role.ROLE_USER));
+        personDAOImpl.save(new Person(name, password,  Role.ROLE_USER));
     }
 
     /**
@@ -34,7 +33,7 @@ public class AuthorizationService {
      **/
 
     public HashMap<String, Boolean> login(String name, String password) {
-        Person person = personDAO.getPersonByName(name);
+        Person person = personDAOImpl.findByName(name);
 
         boolean isAuthorized, isAdmin;
 
