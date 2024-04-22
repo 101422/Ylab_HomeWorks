@@ -1,12 +1,12 @@
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.security.Role;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+
+import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
 
 public class PersonsTestService {
 
@@ -14,49 +14,75 @@ public class PersonsTestService {
 
     public PersonsTestService(DBConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
+        createSchemaIfNotExists();
         createPersonTableIfNotExists();
     }
 
-    public void createPerson(Person person) {
+    public Optional<Person> findByName(String name) {
+        try (Connection connection = this.connectionProvider.getConnection()){
+            String query = GET_PERSON_BY_NAME;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            Person person = null;
+
+            while (resultSet.next()) {
+                person = new Person();
+
+                person.setId(resultSet.getInt("id"));
+                person.setName(resultSet.getString("name"));
+                person.setPassword(resultSet.getString("password"));
+                person.setRole(Role.valueOf (resultSet.getString("role")));
+            }
+
+            return Optional.ofNullable(person);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void save(Person person) {
+        try (Connection connection = this.connectionProvider.getConnection()){
+            String query = SAVE_PERSON;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, person.getName());
+            preparedStatement.setString(2, person.getPassword());
+            preparedStatement.setString(3, person.getRole().toString());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void createSchemaIfNotExists() {
         try (Connection conn = this.connectionProvider.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(
-                    "insert into person(id,name, password, role) values(?,?,?,?)"
+                    """
+                    CREATE SCHEMA if not exists entities
+                    """
             );
-            pstmt.setInt(1, person.getId());
-            pstmt.setString(2, person.getName());
-            pstmt.setString(3, person.getPassword());
-            pstmt.setString(4, String.valueOf(person.getRole()));
             pstmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<Person> getAllPersons() {
-        List<Person> persons = new ArrayList<>();
-
-        try (Connection conn = this.connectionProvider.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(
-                    "select id,name, password, role from person"
-            );
-            ResultSet resultSet = pstmt.executeQuery();
-            while (resultSet.next()) {
-
-
-
-                persons.add(new Person(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("password"), Role.valueOf (resultSet.getString("role")) ));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return persons;
-    }
-
     private void createPersonTableIfNotExists() {
         try (Connection conn = this.connectionProvider.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(
                     """
-                    create table if not exists person (
+                        CREATE SEQUENCE if not exists person_id_autoincrement
+                        START WITH 1
+                        INCREMENT BY 1;       
+                    create table if not exists entities.person (
                         id int PRIMARY KEY,
                         name varchar(100) NOT NULL UNIQUE,
                         password varchar(100) NOT NULL,
