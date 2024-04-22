@@ -13,6 +13,7 @@ import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Сервис по взаимодействию с базами данных.
@@ -65,9 +66,9 @@ public class TrainingService {
      * @return список тренировок пользователя
      **/
     public List<Training> findTrainingsByPersonName(String personName){
-        Person person = personDAOImpl.findByName(personName);
+        Optional<Person> foundedPerson = personDAOImpl.findByName(personName);
 
-        return trainingDAOImpl.findByPerson(person);
+        return trainingDAOImpl.findByPerson(foundedPerson.orElse(null));
     }
 
     /**
@@ -88,8 +89,10 @@ public class TrainingService {
      * @param date дата
      * @return список тренировок с отбором по пользователю, типу тренировки и дате.
      **/
-    public Training findTrainingsByPersonTypeDate(Person person, TrainingType trainingType, Date date){
-        return trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+    public Optional<Training> findTrainingsByPersonTypeDate(Person person, TrainingType trainingType, Date date){
+        Optional<Training> foundedTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+
+        return Optional.ofNullable(foundedTraining.orElse(null));
     }
 
 
@@ -103,24 +106,34 @@ public class TrainingService {
      * @param amountOfCalories количество калорий
      * @param additionalInformation список из Map с дополнительными сведениями о тренировке
      **/
-    public void createTraining(String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) {
-        Person person = personDAOImpl.findByName(personName);
+    public void createTraining(String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) throws InstantiationException, IllegalAccessException {
+        Optional<Person> optionalPerson = personDAOImpl.findByName(personName);
 
-        if (person == null){
+        Person person;
+
+        if (optionalPerson.isEmpty()){
             System.out.println("Person with name " + personName + " wasn't found!");
 
             return;
         }
+        else {
+            person = optionalPerson.get();
+        }
 
-        TrainingType trainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
+        Optional<TrainingType> optionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
 
-        if (trainingType == null){
+        TrainingType trainingType;
+
+        if (optionalTrainingType.isEmpty()){
             System.out.println("Training type with name " + trainingTypeName + " wasn't found!");
 
             return;
         }
+        else {
+            trainingType = optionalTrainingType.get();
+        }
 
-        if (findTrainingsByPersonTypeDate(person, trainingType, date) != null) {
+        if (findTrainingsByPersonTypeDate(person, trainingType, date).isPresent()) {
             System.out.println("You have already created training of type: " + trainingTypeName + " in this date: " + date + "!");
 
             return;
@@ -134,7 +147,6 @@ public class TrainingService {
         training.setDuration(duration);
         training.setAmountOfCalories(amountOfCalories);
 
-
         trainingDAOImpl.save(training);
 
         System.out.println("Created training:");
@@ -143,7 +155,18 @@ public class TrainingService {
 
         System.out.println("Additional information:");
 
-        Training foundedTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+        Optional<Training> optionalFoundedTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+
+        Training foundedTraining;
+
+        if (optionalFoundedTraining.isEmpty()){
+            System.out.println("Training wasn't found!");
+
+            return;
+        }
+        else {
+            foundedTraining = optionalFoundedTraining.get();
+        }
 
         additionalInformation.forEach( (additionalInformationElement) -> {
 
@@ -161,7 +184,6 @@ public class TrainingService {
                 System.out.println(trainingAdditionalInformation);
             });
         });
-
     }
 
     /**
@@ -175,23 +197,44 @@ public class TrainingService {
      * @param amountOfCalories количество калорий
      * @param additionalInformation список из Map с дополнительными сведениями о тренировке
      **/
-    public void updateTraining(int id, String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) {
-        Training training = trainingDAOImpl.findById(id);
+    public void updateTraining(int id, String personName, Date date, String trainingTypeName, int duration, int amountOfCalories, List<HashMap<String, String>> additionalInformation) throws InstantiationException, IllegalAccessException {
+        Optional<Training> optionalTraining = trainingDAOImpl.findById(id);
 
-        Person person = personDAOImpl.findByName(personName);
+        Training training;
 
-        if (person == null){
+        if (optionalTraining.isEmpty()){
+            System.out.println("Training wasn't found!");
+
+            return;
+        }
+        else {
+            training = optionalTraining.get();
+        }
+
+        Optional<Person> optionalPerson = personDAOImpl.findByName(personName);
+
+        Person person;
+
+        if (optionalPerson.isEmpty()){
             System.out.println("Person with name " + personName + " wasn't found!");
 
             return;
         }
+        else {
+            person = optionalPerson.get();
+        }
 
-        TrainingType trainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
+        Optional<TrainingType> optionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeName);
 
-        if (trainingType == null){
+        TrainingType trainingType;
+
+        if (optionalTrainingType.isEmpty()){
             System.out.println("Training type with name " + trainingTypeName + " wasn't found!");
 
             return;
+        }
+        else {
+            trainingType = optionalTrainingType.get();
         }
 
         training.setPerson(person);
@@ -199,7 +242,6 @@ public class TrainingService {
         training.setTrainingType(trainingType);
         training.setDuration(duration);
         training.setAmountOfCalories(amountOfCalories);
-        //training.setAdditionalInformation(additionhibernate.propertiesalInformation);
 
         trainingDAOImpl.update(id , training);
 
@@ -209,7 +251,18 @@ public class TrainingService {
 
         System.out.println("Additional information:");
 
-        Training foundedTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+        Optional<Training> optionalFoundedTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(person, trainingType, date);
+
+        Training foundedTraining;
+
+        if (optionalFoundedTraining.isEmpty()){
+            System.out.println("Training wasn't found!");
+
+            return;
+        }
+        else {
+            foundedTraining = optionalFoundedTraining.get();
+        }
 
         additionalInformation.forEach( (additionalInformationElement) -> {
 

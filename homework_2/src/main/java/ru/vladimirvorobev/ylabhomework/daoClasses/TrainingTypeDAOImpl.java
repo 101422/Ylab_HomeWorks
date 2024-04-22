@@ -1,22 +1,25 @@
 package ru.vladimirvorobev.ylabhomework.daoClasses;
 
-import ru.vladimirvorobev.ylabhomework.JDBC.JDBCService;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import ru.vladimirvorobev.ylabhomework.dao.TrainingTypeDAO;
-
+import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
+
 
 /**
- * DAO для работы с виртуальной базой данных типов тренировок в виде ArrayList.
+ * DAO для работы с базой данных типов тренировок.
  **/
 public class TrainingTypeDAOImpl implements TrainingTypeDAO {
 
     public static int TRAINING_TYPES_COUNT;
-    JDBCService jdbcService;
+    DatabaseService databaseService;
 
     {
-        jdbcService = new JDBCService();
+        databaseService = new DatabaseService();
     }
 
     /**
@@ -25,7 +28,29 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
      * @return список всех типов тренировок
      **/
     public List<TrainingType> findAll(){
-        return jdbcService.findTrainingTypes();
+        try (Connection connection = databaseService.connect()){
+            Statement statement = connection.createStatement();
+
+            String query = GET_ALL_TRAINING_TYPES;
+
+            ResultSet resultSet = statement.executeQuery(query);
+
+            List<TrainingType> trainingTypes = new LinkedList<>();
+
+            while (resultSet.next()) {
+                TrainingType trainingType = new TrainingType();
+
+                trainingType.setId(resultSet.getInt("id"));
+                trainingType.setName(resultSet.getString("name"));
+
+                trainingTypes.add(trainingType);
+            }
+
+            return trainingTypes;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -33,10 +58,29 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
      * @param name имя типа тренировки
      * @return тип тренировки
      **/
-    public TrainingType findByName(String name) {
-        Optional<TrainingType> foundedTrainingType  = Optional.ofNullable(jdbcService.findTrainingTypeByName(name));
+    public Optional<TrainingType>  findByName(String name) {
+        try (Connection connection = databaseService.connect()){
+            String query = GET_TRAINING_TYPE_BY_NAME;
 
-        return foundedTrainingType.orElse(null);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            TrainingType trainingType = null;
+
+            while (resultSet.next()) {
+                trainingType = new TrainingType();
+
+                trainingType.setId(resultSet.getInt("id"));
+                trainingType.setName(resultSet.getString("name"));
+            }
+
+            return Optional.ofNullable(trainingType);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -45,7 +89,17 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
      * @param trainingType тип тренировки
      **/
     public void save(TrainingType trainingType) {
-        jdbcService.saveTrainingTypes(trainingType);
+        try (Connection connection = databaseService.connect()){
+            String query = SAVE_TRAINING_TYPE;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, trainingType.getName());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

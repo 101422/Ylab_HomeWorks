@@ -1,21 +1,22 @@
 package ru.vladimirvorobev.ylabhomework.daoClasses;
 
-import ru.vladimirvorobev.ylabhomework.JDBC.JDBCService;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
-
+import ru.vladimirvorobev.ylabhomework.security.Role;
+import java.sql.*;
 import java.util.Optional;
-
+import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
 
 /**
- * DAO для работы с виртуальной базой данных пользователей в виде ArrayList.
+ * DAO для работы с базой данных пользователей.
  **/
 public class PersonDAOImpl implements PersonDAO {
 
-    JDBCService jdbcService;
+    DatabaseService databaseService;
 
     {
-        jdbcService = new JDBCService();
+        databaseService = new DatabaseService();
     }
 
     /**
@@ -24,10 +25,32 @@ public class PersonDAOImpl implements PersonDAO {
      * @param name имя пользователя
      * @return пользователь
      **/
-    public Person findByName(String name) {
-        Optional<Person> foundedPerson = Optional.ofNullable(jdbcService.findPersonByName(name));
+    public Optional<Person> findByName(String name) {
+        try (Connection connection = databaseService.connect()){
+            String query = GET_PERSON_BY_NAME;
 
-        return foundedPerson.orElse(null);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            Person person = null;
+
+            while (resultSet.next()) {
+                person = new Person();
+
+                person.setId(resultSet.getInt("id"));
+                person.setName(resultSet.getString("name"));
+                person.setPassword(resultSet.getString("password"));
+                person.setRole(Role.valueOf (resultSet.getString("role")));
+            }
+
+            return Optional.ofNullable(person);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -36,7 +59,18 @@ public class PersonDAOImpl implements PersonDAO {
      * @param person пользователь
      **/
     public void save(Person person) {
-        jdbcService.savePerson(person);
-    }
+        try (Connection connection = databaseService.connect()){
+            String query = SAVE_PERSON;
 
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, person.getName());
+            preparedStatement.setString(2, person.getPassword());
+            preparedStatement.setString(3, person.getRole().toString());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

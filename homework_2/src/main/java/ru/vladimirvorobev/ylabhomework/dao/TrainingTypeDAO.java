@@ -2,6 +2,7 @@ package ru.vladimirvorobev.ylabhomework.dao;
 
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import java.util.List;
+import java.util.Optional;
 
 public interface TrainingTypeDAO {
 
@@ -17,7 +18,7 @@ public interface TrainingTypeDAO {
      * @param name имя типа тренировки
      * @return тип тренировки
      **/
-    TrainingType findByName(String name);
+    Optional<TrainingType> findByName(String name);
 
     /**
      * Сохранение типа тренировки в базе.

@@ -5,6 +5,7 @@ import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface TrainingDAO {
 
@@ -31,7 +32,7 @@ public interface TrainingDAO {
      * @param date дата
      * @return список тренировок с отбором по пользователю, типу тренировки и дате.
      **/
-    Training findByPersonAndTrainingTypeAndDate(Person person, TrainingType trainingType, Date date);
+    Optional<Training> findByPersonAndTrainingTypeAndDate(Person person, TrainingType trainingType, Date date);
 
     /**
      * Получение тренировки по id.
@@ -39,7 +40,7 @@ public interface TrainingDAO {
      * @param id
      * @return тренировка.
      **/
-    Training findById(int id);
+    Optional<Training> findById(int id);
 
     /**
      * Сохранение тренировки в базе.

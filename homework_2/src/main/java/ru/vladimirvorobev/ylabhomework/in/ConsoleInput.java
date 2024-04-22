@@ -19,7 +19,7 @@ public class ConsoleInput {
     /**
     * Ввод данных из консоли.
     **/
-    public void input() {
+    public void input() throws InstantiationException, IllegalAccessException {
         AuthorizationService authorizationService = new AuthorizationService();
         TrainingService trainingService = new TrainingService();
         ConsoleOutput consoleOutput = new ConsoleOutput();

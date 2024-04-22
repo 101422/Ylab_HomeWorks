@@ -1,21 +1,23 @@
 package ru.vladimirvorobev.ylabhomework.daoClasses;
 
-import ru.vladimirvorobev.ylabhomework.JDBC.JDBCService;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.dao.TrainingAdditionalInformationDAO;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingAdditionalInformation;
-
+import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
+import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
 
 /**
- * DAO для работы с виртуальной базой данных типов тренировок в виде ArrayList.
+ * DAO для работы с базой данных дополнительной информации о тренировках.
  **/
 public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalInformationDAO {
 
-    JDBCService jdbcService;
+    DatabaseService databaseService;
 
     {
-        jdbcService = new JDBCService();
+        databaseService = new DatabaseService();
     }
 
     /**
@@ -25,7 +27,36 @@ public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalI
      **/
     @Override
     public List<TrainingAdditionalInformation> findByTraining(Training training) {
-        return jdbcService.findTrainingAdditionalInformationByTraining(training);
+        try (Connection connection = databaseService.connect()){
+
+            String query = GET_TRAINING_ADDITIONAL_INFORMATION_BY_TRAINING_ID;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, training.getId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<TrainingAdditionalInformation> trainingAdditionalInformationList = new LinkedList<>();
+
+            TrainingAdditionalInformation trainingAdditionalInformation = null;
+
+            while (resultSet.next()) {
+                trainingAdditionalInformation = new TrainingAdditionalInformation();
+
+                trainingAdditionalInformation.setId(resultSet.getInt("id"));
+                trainingAdditionalInformation.setKey(resultSet.getString("key"));
+                trainingAdditionalInformation.setValue(resultSet.getString("value"));
+
+
+                trainingAdditionalInformationList.add(trainingAdditionalInformation);
+            }
+
+            return trainingAdditionalInformationList;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -36,9 +67,19 @@ public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalI
      **/
     @Override
     public void save(TrainingAdditionalInformation trainingAdditionalInformation, Training training) {
-        jdbcService.saveTrainingAdditionalInformation(trainingAdditionalInformation, training);
+        try (Connection connection = databaseService.connect()){
+            String query = SAVE_TRAINING_ADDITIONAL_INFORMATION;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, trainingAdditionalInformation.getKey());
+            preparedStatement.setString(2, trainingAdditionalInformation.getValue());
+            preparedStatement.setInt(3, training.getId());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-
 
 }

@@ -1,25 +1,28 @@
 package ru.vladimirvorobev.ylabhomework.daoClasses;
 
-import ru.vladimirvorobev.ylabhomework.JDBC.JDBCService;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import ru.vladimirvorobev.ylabhomework.dao.TrainingDAO;
-import java.sql.Date;
+import ru.vladimirvorobev.ylabhomework.security.Role;
+import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
+
 
 /**
- * DAO для работы с виртуальной базой данных тренировок в виде ArrayList.
+ * DAO для работы с базой данных тренировок.
  **/
 public class TrainingDAOImpl implements TrainingDAO {
 
-    JDBCService jdbcService;
+    DatabaseService databaseService;
 
     {
-        jdbcService = new JDBCService();
+        databaseService = new DatabaseService();
     }
-
 
     /**
      * Получение списка всех тренировок.
@@ -27,7 +30,50 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @return список тренировок
      **/
     public List<Training> findAll(){
-        return jdbcService.findTrainings();
+        try (Connection connection = databaseService.connect()){
+            String query = GET_ALL_TRAININGS;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Training> trainings = new LinkedList<>();
+
+            Training training = null;
+
+            while (resultSet.next()) {
+                training = new Training();
+
+                training.setId(resultSet.getInt("id"));
+                training.setDate(resultSet.getDate("date"));
+                training.setDuration(resultSet.getInt("duration"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+
+                Person foundedPerson = new Person();
+
+                foundedPerson.setId(resultSet.getInt("person_id"));
+                foundedPerson.setName(resultSet.getString("person_name"));
+                foundedPerson.setPassword(resultSet.getString("person_password"));
+                foundedPerson.setRole(Role.valueOf (resultSet.getString("person_role")));
+
+                training.setPerson(foundedPerson);
+
+                TrainingType foundedTrainingType = new TrainingType();
+
+                foundedTrainingType.setId(resultSet.getInt("training_type_id"));
+                foundedTrainingType.setName(resultSet.getString("training_type_name"));
+
+                training.setTrainingType(foundedTrainingType);
+
+                trainings.add(training);
+            }
+
+            return trainings;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -37,7 +83,52 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @return список тренировок пользователя
      **/
     public List<Training> findByPerson(Person person) {
-        return jdbcService.findTrainingsByPerson(person);
+        try (Connection connection = databaseService.connect()){
+            String query = GET_TRAININGS_BY_PERSON_ID;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, person.getId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Training> trainings = new LinkedList<>();
+
+            Training training = null;
+
+            while (resultSet.next()) {
+                training = new Training();
+
+                training.setId(resultSet.getInt("id"));
+                training.setDate(resultSet.getDate("date"));
+                training.setDuration(resultSet.getInt("duration"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+
+                Person foundedPerson = new Person();
+
+                foundedPerson.setId(resultSet.getInt("person_id"));
+                foundedPerson.setName(resultSet.getString("person_name"));
+                foundedPerson.setPassword(resultSet.getString("person_password"));
+                foundedPerson.setRole(Role.valueOf (resultSet.getString("person_role")));
+
+                training.setPerson(foundedPerson);
+
+                TrainingType foundedTrainingType = new TrainingType();
+
+                foundedTrainingType.setId(resultSet.getInt("training_type_id"));
+                foundedTrainingType.setName(resultSet.getString("training_type_name"));
+
+                training.setTrainingType(foundedTrainingType);
+
+                trainings.add(training);
+            }
+
+            return trainings;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -48,10 +139,51 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @param date дата
      * @return тренировка.
      **/
-    public Training findByPersonAndTrainingTypeAndDate(Person person, TrainingType trainingType, Date date) {
-        Optional<Training> foundedTraining = Optional.ofNullable(jdbcService.findTrainingByPersonTrainingTypeDate(person, trainingType, date));
+    public Optional<Training>  findByPersonAndTrainingTypeAndDate(Person person, TrainingType trainingType, Date date) {
+        try (Connection connection = databaseService.connect()){
+            String query = GET_TRAINING_BY_PERSON_ID_AND_TRAINING_TYPE_ID_AND_DATE;
 
-        return foundedTraining.orElse(null);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, person.getId());
+            preparedStatement.setInt(2, trainingType.getId());
+            preparedStatement.setDate(3, date);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            Training training = null;
+
+            while (resultSet.next()) {
+                training = new Training();
+
+                training.setId(resultSet.getInt("id"));
+                training.setDate(resultSet.getDate("date"));
+                training.setDuration(resultSet.getInt("duration"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+
+                Person foundedPerson = new Person();
+
+                foundedPerson.setId(resultSet.getInt("person_id"));
+                foundedPerson.setName(resultSet.getString("person_name"));
+                foundedPerson.setPassword(resultSet.getString("person_password"));
+                foundedPerson.setRole(Role.valueOf (resultSet.getString("person_role")));
+
+                training.setPerson(foundedPerson);
+
+                TrainingType foundedTrainingType = new TrainingType();
+
+                foundedTrainingType.setId(resultSet.getInt("training_type_id"));
+                foundedTrainingType.setName(resultSet.getString("training_type_name"));
+
+                training.setTrainingType(foundedTrainingType);
+            }
+
+            return Optional.ofNullable(training);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -60,10 +192,49 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @param id
      * @return тренировка.
      **/
-    public Training findById(int id) {
-        Optional<Training> foundedTraining = Optional.ofNullable(jdbcService.findTrainingById(id));
+    public Optional<Training> findById(int id) {
+        try (Connection connection = databaseService.connect()){
+            String query = GET_TRAINING_BY_ID;
 
-        return foundedTraining.orElse(null);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            Training training = null;
+
+            while (resultSet.next()) {
+                training = new Training();
+
+                training.setId(resultSet.getInt("id"));
+                training.setDate(resultSet.getDate("date"));
+                training.setDuration(resultSet.getInt("duration"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+                training.setAmountOfCalories(resultSet.getInt("amount_of_calories"));
+
+                Person foundedPerson = new Person();
+
+                foundedPerson.setId(resultSet.getInt("person_id"));
+                foundedPerson.setName(resultSet.getString("person_name"));
+                foundedPerson.setPassword(resultSet.getString("person_password"));
+                foundedPerson.setRole(Role.valueOf (resultSet.getString("person_role")));
+
+                training.setPerson(foundedPerson);
+
+                TrainingType foundedTrainingType = new TrainingType();
+
+                foundedTrainingType.setId(resultSet.getInt("training_type_id"));
+                foundedTrainingType.setName(resultSet.getString("training_type_name"));
+
+                training.setTrainingType(foundedTrainingType);
+            }
+
+            return Optional.ofNullable(training);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -72,7 +243,21 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @param training тренировка
      **/
     public void save(Training training) {
-        jdbcService.saveTraining(training);
+        try (Connection connection = databaseService.connect()){
+            String query = SAVE_TRAINING;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setDate(1, training.getDate());
+            preparedStatement.setInt(2, training.getDuration());
+            preparedStatement.setInt(3, training.getAmountOfCalories());
+            preparedStatement.setInt(4, training.getPerson().getId());
+            preparedStatement.setInt(5, training.getTrainingType().getId());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -82,7 +267,22 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @param training
      **/
     public void update(int id, Training training) {
-        jdbcService.updateTraining(id,training);
+        try (Connection connection = databaseService.connect()){
+            String query = UPDATE_TRAINING;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setDate(1, training.getDate());
+            preparedStatement.setInt(2, training.getDuration());
+            preparedStatement.setInt(3, training.getAmountOfCalories());
+            preparedStatement.setInt(4, training.getPerson().getId());
+            preparedStatement.setInt(5, training.getTrainingType().getId());
+            preparedStatement.setInt(6, training.getId());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -91,8 +291,17 @@ public class TrainingDAOImpl implements TrainingDAO {
      * @param id
      **/
     public void delete(int id) {
-        jdbcService.deleteTraining(id);
-    }
+        try (Connection connection = databaseService.connect()){
+            String query = DELETE_TRAINING;
 
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

@@ -4,6 +4,8 @@ import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
 import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import java.util.HashMap;
+import java.util.Optional;
+
 /**
  * Сервис авторизации пользователя.
  **/
@@ -34,16 +36,20 @@ public class AuthorizationService {
      **/
 
     public HashMap<String, Boolean> login(String name, String password) {
-        Person person = personDAOImpl.findByName(name);
+        Optional<Person> optionalPerson = personDAOImpl.findByName(name);
+
+        Person person = null;
 
         boolean isAuthorized, isAdmin;
 
-        if (person == null) {
+        if (optionalPerson.isEmpty()) {
             System.out.println("A person with name " + name + " wasn't found!");
 
             isAuthorized = false;
         }
         else {
+            person = optionalPerson.get();
+
             if (!person.getPassword().equals(password)) {
                 System.out.println("Incorrect password!");
 
@@ -64,7 +70,6 @@ public class AuthorizationService {
         credentials.put("isAdmin", isAdmin);
 
         return credentials;
-
     }
 
 }
