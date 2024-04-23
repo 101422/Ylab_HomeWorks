@@ -15,11 +15,10 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class TrainingTypeDAOImpl implements TrainingTypeDAO {
 
-    public static int TRAINING_TYPES_COUNT;
-    DatabaseService databaseService;
+    private DatabaseService databaseService;
 
-    {
-        databaseService = new DatabaseService();
+    public TrainingTypeDAOImpl(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
     /**

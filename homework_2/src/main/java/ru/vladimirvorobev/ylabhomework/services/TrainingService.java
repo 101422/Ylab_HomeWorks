@@ -6,14 +6,19 @@ import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
 import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingAdditionalInformationDAOImpl;
 import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingDAOImpl;
 import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingTypeDAOImpl;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingAdditionalInformation;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 /**
  * Сервис по взаимодействию с базами данных.
@@ -24,12 +29,22 @@ public class TrainingService {
     private TrainingTypeDAOImpl trainingTypeDAOImpl;
     private PersonDAOImpl personDAOImpl;
     private TrainingAdditionalInformationDAOImpl trainingAdditionalInformationDAOImpl;
+    static Properties property;
+    public TrainingService() throws IOException {
 
-    public TrainingService(){
-        this.trainingDAOImpl = new TrainingDAOImpl();
-        this.trainingTypeDAOImpl = new TrainingTypeDAOImpl();
-        this.trainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl();
-        this.personDAOImpl = new PersonDAOImpl();
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("JDBCSettings.properties");
+
+        property = new Properties();
+        property.load(in);
+
+        DatabaseService databaseService = new DatabaseService(property.getProperty("db.conn.url"),
+        property.getProperty("db.username"),
+        property.getProperty("db.password"));
+
+        this.trainingDAOImpl = new TrainingDAOImpl(databaseService);
+        this.trainingTypeDAOImpl = new TrainingTypeDAOImpl(databaseService);
+        this.trainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl(databaseService);
+        this.personDAOImpl = new PersonDAOImpl(databaseService);
     }
 
     /**
@@ -38,7 +53,7 @@ public class TrainingService {
      * @param trainingTypeName имя типа тренировкок
      **/
     public void createTrainingType(String trainingTypeName) {
-        trainingTypeDAOImpl.save(new TrainingType(++TrainingTypeDAOImpl.TRAINING_TYPES_COUNT, trainingTypeName));
+        trainingTypeDAOImpl.save(new TrainingType(trainingTypeName));
     }
 
     /**
@@ -177,9 +192,7 @@ public class TrainingService {
                 trainingAdditionalInformation.setKey(key);
                 trainingAdditionalInformation.setValue(value);
 
-                TrainingAdditionalInformationDAOImpl TrainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl();
-
-                TrainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, foundedTraining);
+                trainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, foundedTraining);
 
                 System.out.println(trainingAdditionalInformation);
             });
@@ -273,9 +286,7 @@ public class TrainingService {
                 trainingAdditionalInformation.setKey(key);
                 trainingAdditionalInformation.setValue(value);
 
-                TrainingAdditionalInformationDAOImpl TrainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl();
-
-                TrainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, foundedTraining);
+                trainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, foundedTraining);
 
                 System.out.println(trainingAdditionalInformation);
             });

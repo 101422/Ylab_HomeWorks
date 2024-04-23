@@ -7,6 +7,8 @@ import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.out.ConsoleOutput;
 import ru.vladimirvorobev.ylabhomework.security.AuthorizationService;
 import ru.vladimirvorobev.ylabhomework.services.TrainingService;
+
+import java.io.IOException;
 import java.util.*;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -19,7 +21,7 @@ public class ConsoleInput {
     /**
     * Ввод данных из консоли.
     **/
-    public void input() throws InstantiationException, IllegalAccessException {
+    public void input() throws InstantiationException, IllegalAccessException, IOException {
         AuthorizationService authorizationService = new AuthorizationService();
         TrainingService trainingService = new TrainingService();
         ConsoleOutput consoleOutput = new ConsoleOutput();

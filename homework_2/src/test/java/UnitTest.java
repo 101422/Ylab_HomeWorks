@@ -3,6 +3,11 @@ import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingAdditionalInformationDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingDAOImpl;
+import ru.vladimirvorobev.ylabhomework.daoClasses.TrainingTypeDAOImpl;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.models.TrainingAdditionalInformation;
@@ -21,10 +26,10 @@ public class UnitTest {
           "postgres:15-alpine"
   );
 
-  private PersonsTestService personsTestService;
-  private TrainingTypeTestService trainingTypeTestService;
-  private TrainingTestService trainingTestService;
-  private TrainingAdditionalInformationTestService trainingAdditionalInformationTestService;
+  private TrainingTypeDAOImpl trainingTypeDAOImpl;
+  private TrainingDAOImpl trainingDAOImpl;
+  private TrainingAdditionalInformationDAOImpl trainingAdditionalInformationDAOImpl;
+  private  PersonDAOImpl personDAOImpl;
 
   @BeforeAll
   static void beforeAll() {
@@ -38,15 +43,13 @@ public class UnitTest {
 
   @BeforeEach
   void setUp() {
-    DBConnectionProvider connectionProvider = new DBConnectionProvider(
-            postgres.getJdbcUrl(),
-            postgres.getUsername(),
-            postgres.getPassword()
-    );
-    personsTestService = new PersonsTestService(connectionProvider);
-    trainingTypeTestService = new TrainingTypeTestService(connectionProvider);
-    trainingTestService = new TrainingTestService(connectionProvider);
-    trainingAdditionalInformationTestService = new TrainingAdditionalInformationTestService(connectionProvider);
+      DatabaseService databaseService = new DatabaseService(   postgres.getJdbcUrl(),
+              postgres.getUsername(),
+              postgres.getPassword());
+    personDAOImpl = new PersonDAOImpl(databaseService);
+    trainingTypeDAOImpl = new TrainingTypeDAOImpl(databaseService);
+    trainingDAOImpl = new TrainingDAOImpl(databaseService);
+    trainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl(databaseService);
   }
 
   @InjectMocks
@@ -60,9 +63,9 @@ public class UnitTest {
   @Test
   @Order(1)
   public void shouldCreateTrainingTypeAndFindByName() {
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      Optional<TrainingType> foundOptionalTrainingType = trainingTypeTestService.findByName(trainingTypeTest.getName());
+      Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
 
       assertTrue(foundOptionalTrainingType.isPresent());
 
@@ -76,9 +79,9 @@ public class UnitTest {
   public void shouldCreatePersonAndFindByName() {
       Person personTest = new Person(1,"personName", "1", ROLE_USER);
 
-      personsTestService.save(personTest);
+      personDAOImpl.save(personTest);
 
-      Optional<Person> foundOptionalPerson = personsTestService.findByName(personTest.getName());
+      Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
 
       assertTrue(foundOptionalPerson.isPresent());
 
@@ -90,11 +93,11 @@ public class UnitTest {
   @Test
   @Order(3)
   public void shouldCreateTrainingAndFindById() {
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      trainingTestService.save(trainingTest);
+      trainingDAOImpl.save(trainingTest);
 
-      Optional<Training> foundOptionalTraining = trainingTestService.findById(trainingTest.getId());
+      Optional<Training> foundOptionalTraining = trainingDAOImpl.findById(trainingTest.getId());
 
       assertTrue(foundOptionalTraining.isPresent());
 
@@ -106,13 +109,13 @@ public class UnitTest {
   @Test
   @Order(4)
   public void shouldCreateTrainingAdditionalInformationAndFindByTraining() {
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      trainingTestService.save(trainingTest);
+      trainingDAOImpl.save(trainingTest);
 
-      trainingAdditionalInformationTestService.save(trainingAdditionalInformation, trainingTest);
+      trainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, trainingTest);
 
-      List<TrainingAdditionalInformation> foundTrainingAdditionalInformations = trainingAdditionalInformationTestService.findByTraining(trainingTest);
+      List<TrainingAdditionalInformation> foundTrainingAdditionalInformations = trainingAdditionalInformationDAOImpl.findByTraining(trainingTest);
 
       assertTrue(foundTrainingAdditionalInformations.size() == 1);
 
@@ -122,7 +125,7 @@ public class UnitTest {
   @Test
   @Order(5)
   void shouldGetTrainingTypes() {
-      List<TrainingType> trainingTypes = trainingTypeTestService.findAll();
+      List<TrainingType> trainingTypes = trainingTypeDAOImpl.findAll();
 
       assertEquals(3, trainingTypes.size());
   }
@@ -130,9 +133,9 @@ public class UnitTest {
   @Test
   @Order(6)
   void shouldGetTrainings() {
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      List<Training> trainings = trainingTestService.findAll();
+      List<Training> trainings = trainingDAOImpl.findAll();
 
       assertEquals(2, trainings.size());
   }
@@ -142,20 +145,20 @@ public class UnitTest {
   void shouldGetTrainingsByPerson() {
       Person personTest = new Person(1,"personName5", "1", ROLE_USER);
 
-      personsTestService.save(personTest);
+      personDAOImpl.save(personTest);
 
       Person personTest2 = new Person(2, "personName6", "1", ROLE_USER);
 
-      personsTestService.save(personTest2);
+      personDAOImpl.save(personTest2);
 
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      trainingTestService.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
-      trainingTestService.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
-      trainingTestService.save(new Training(3, personTest2, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
+      trainingDAOImpl.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
+      trainingDAOImpl.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
+      trainingDAOImpl.save(new Training(3, personTest2, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
 
 
-      List<Training> trainings = trainingTestService.findByPerson(personTest2);
+      List<Training> trainings = trainingDAOImpl.findByPerson(personTest2);
       assertEquals(1, trainings.size());
   }
 
@@ -164,14 +167,14 @@ public class UnitTest {
   void shouldGetTrainingPersonAndTrainingTypeAndDate() {
       Person personTest = new Person(1,"personName7", "1", ROLE_USER);
 
-      personsTestService.save(personTest);
+      personDAOImpl.save(personTest);
 
-      trainingTypeTestService.save(trainingTypeTest);
+      trainingTypeDAOImpl.save(trainingTypeTest);
 
-      trainingTestService.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
-      trainingTestService.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
+      trainingDAOImpl.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
+      trainingDAOImpl.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
 
-      Optional<Training> foundOptionalTraining = trainingTestService.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
+      Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
 
       assertTrue(foundOptionalTraining.isPresent());
 
@@ -183,7 +186,7 @@ public class UnitTest {
   @Test
   @Order(9)
   public void shouldUpdateTrainingAndFindById() {
-      Optional<Training> foundOptionalTraining = trainingTestService.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
+      Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
 
       assertTrue(foundOptionalTraining.isPresent());
 
@@ -193,9 +196,9 @@ public class UnitTest {
 
       foundTraining.setAmountOfCalories(2000);
 
-      trainingTestService.update(foundTraining.getId(), foundTraining);
+      trainingDAOImpl.update(foundTraining.getId(), foundTraining);
 
-      Optional<Training> foundOptionalTraining2 = trainingTestService.findById(foundTraining.getId());
+      Optional<Training> foundOptionalTraining2 = trainingDAOImpl.findById(foundTraining.getId());
 
       assertTrue(foundOptionalTraining2.isPresent());
 
@@ -207,13 +210,13 @@ public class UnitTest {
   @Test
   @Order(10)
   void shouldDeleteTrainingById() {
-      List<Training> trainings = trainingTestService.findAll();
+      List<Training> trainings = trainingDAOImpl.findAll();
 
       assertEquals(7, trainings.size());
 
-      trainingTestService.delete(trainings.get(0).getId());
+      trainingDAOImpl.delete(trainings.get(0).getId());
 
-      List<Training> trainings2 = trainingTestService.findAll();
+      List<Training> trainings2 = trainingDAOImpl.findAll();
 
       assertEquals(6, trainings2.size());
   }

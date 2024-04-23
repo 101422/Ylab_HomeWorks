@@ -2,9 +2,15 @@ package ru.vladimirvorobev.ylabhomework.security;
 
 import ru.vladimirvorobev.ylabhomework.dao.PersonDAO;
 import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
+import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Properties;
+
 
 /**
  * Сервис авторизации пользователя.
@@ -12,9 +18,19 @@ import java.util.Optional;
 public class AuthorizationService {
 
     private PersonDAOImpl personDAOImpl;
+    static Properties property;
 
-    public AuthorizationService(){
-        this.personDAOImpl = new PersonDAOImpl();
+    public AuthorizationService() throws IOException {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("JDBCSettings.properties");
+
+        property = new Properties();
+        property.load(in);
+
+        DatabaseService databaseService = new DatabaseService(property.getProperty("db.conn.url"),
+                property.getProperty("db.username"),
+                property.getProperty("db.password"));
+
+        this.personDAOImpl = new PersonDAOImpl(databaseService);
     }
 
     /**

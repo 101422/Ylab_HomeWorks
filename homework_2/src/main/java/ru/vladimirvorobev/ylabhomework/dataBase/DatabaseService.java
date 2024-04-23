@@ -24,16 +24,17 @@ public class DatabaseService {
     private static String CHANGELOG_FILE;
     static Properties property;
 
-    static {
+    public DatabaseService(String url, String username, String password) {
+
         try {
             InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("JDBCSettings.properties");
 
             property = new Properties();
             property.load(in);
 
-            URL = property.getProperty("db.conn.url");
-            USER_NAME = property.getProperty("db.username");
-            PASSWORD = property.getProperty("db.password");
+            URL = url;
+            USER_NAME = username;
+            PASSWORD = password;
             CHANGELOG_FILE = property.getProperty("db.changelog_file");
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,9 +55,6 @@ public class DatabaseService {
             throw new RuntimeException(e);
         }
 
-    }
-
-    public DatabaseService() {
     }
 
     /**

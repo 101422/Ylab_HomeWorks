@@ -14,10 +14,10 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalInformationDAO {
 
-    DatabaseService databaseService;
+    private DatabaseService databaseService;
 
-    {
-        databaseService = new DatabaseService();
+    public TrainingAdditionalInformationDAOImpl(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
     /**

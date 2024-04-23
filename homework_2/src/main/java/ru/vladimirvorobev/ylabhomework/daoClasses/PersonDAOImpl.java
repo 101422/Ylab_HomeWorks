@@ -13,10 +13,10 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class PersonDAOImpl implements PersonDAO {
 
-    DatabaseService databaseService;
+    private DatabaseService databaseService;
 
-    {
-        databaseService = new DatabaseService();
+    public PersonDAOImpl(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
     /**
