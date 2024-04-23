@@ -22,4 +22,8 @@ public final class SQLQueryConstants {
     public static final String GET_ALL_TRAINING_TYPES = "SELECT * FROM util.training_type";
     public static final String GET_TRAINING_TYPE_BY_NAME = "SELECT * FROM util.training_type WHERE name=?";
     public static final String SAVE_TRAINING_TYPE =  "INSERT INTO util.training_type(id, name) VALUES (nextval('training_type_id_autoincrement'),?)";
+    public static final String DELETE_ALL_PERSONS = "DELETE FROM entities.person";
+    public static final String DELETE_ALL_TRAININGS = "DELETE FROM entities.training";
+    public static final String DELETE_ALL_TRAINING_TYPES = "DELETE FROM util.training_type";
+    public static final String DELETE_ALL_TRAINING_ADDITIONAL_INFORMATION = "DELETE FROM util.training_additional_information";
 }

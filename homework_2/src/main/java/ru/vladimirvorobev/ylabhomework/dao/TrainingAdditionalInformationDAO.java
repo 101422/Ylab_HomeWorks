@@ -25,4 +25,9 @@ public interface TrainingAdditionalInformationDAO {
      **/
     void save(TrainingAdditionalInformation trainingAdditionalInformation, Training training);
 
+    /**
+     * Удаление всех записей о дополнительный информации по тренировкам.
+     *
+     **/
+    public void deleteAll();
 }

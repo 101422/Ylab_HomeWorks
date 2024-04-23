@@ -20,4 +20,10 @@ public interface PersonDAO {
      * @param person пользователь
      **/
     void save(Person person);
+
+    /**
+     * Удаление всех пользователей.
+     *
+     **/
+    public void deleteAll();
 }

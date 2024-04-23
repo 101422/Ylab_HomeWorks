@@ -27,4 +27,10 @@ public interface TrainingTypeDAO {
      **/
     void save(TrainingType trainingType);
 
+    /**
+     * Удаление всех типов тренировок.
+     *
+     **/
+    public void deleteAll();
+
 }

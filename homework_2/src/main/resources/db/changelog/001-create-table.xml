@@ -34,7 +34,6 @@
             </column>
         </createTable>
 
-
         <createTable schemaName="util" tableName="training_type" remarks="Table of training types">
             <column name="id" type="bigint" remarks="id of a training type">
                 <constraints primaryKey="true" nullable="false"/>

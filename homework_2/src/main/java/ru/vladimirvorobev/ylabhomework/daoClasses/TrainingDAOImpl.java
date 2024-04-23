@@ -18,7 +18,7 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class TrainingDAOImpl implements TrainingDAO {
 
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
     public TrainingDAOImpl(DatabaseService databaseService) {
         this.databaseService = databaseService;
@@ -297,6 +297,23 @@ public class TrainingDAOImpl implements TrainingDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
 
             preparedStatement.setInt(1, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Удаление всех тренировок.
+     *
+     **/
+    @Override
+    public void deleteAll() {
+        try (Connection connection = databaseService.connect()){
+            String query = DELETE_ALL_TRAININGS;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

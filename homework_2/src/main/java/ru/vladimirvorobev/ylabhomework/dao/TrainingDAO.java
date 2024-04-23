@@ -64,4 +64,10 @@ public interface TrainingDAO {
      **/
     void delete(int id);
 
+    /**
+     * Удаление всех тренировок.
+     *
+     **/
+    public void deleteAll();
+
 }

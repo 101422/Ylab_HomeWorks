@@ -14,7 +14,7 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalInformationDAO {
 
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
     public TrainingAdditionalInformationDAOImpl(DatabaseService databaseService) {
         this.databaseService = databaseService;
@@ -75,6 +75,23 @@ public class TrainingAdditionalInformationDAOImpl implements TrainingAdditionalI
             preparedStatement.setString(1, trainingAdditionalInformation.getKey());
             preparedStatement.setString(2, trainingAdditionalInformation.getValue());
             preparedStatement.setInt(3, training.getId());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Удаление всех записей о дополнительный информации по тренировкам.
+     *
+     **/
+    @Override
+    public void deleteAll() {
+        try (Connection connection = databaseService.connect()){
+            String query = DELETE_ALL_TRAINING_ADDITIONAL_INFORMATION;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

@@ -14,211 +14,348 @@ import ru.vladimirvorobev.ylabhomework.models.TrainingAdditionalInformation;
 import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.*;
 import static ru.vladimirvorobev.ylabhomework.security.Role.ROLE_USER;
 
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UnitTest {
 
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
           "postgres:15-alpine"
-  );
+    );
 
-  private TrainingTypeDAOImpl trainingTypeDAOImpl;
-  private TrainingDAOImpl trainingDAOImpl;
-  private TrainingAdditionalInformationDAOImpl trainingAdditionalInformationDAOImpl;
-  private  PersonDAOImpl personDAOImpl;
+    private TrainingTypeDAOImpl trainingTypeDAOImpl;
+    private TrainingDAOImpl trainingDAOImpl;
+    private TrainingAdditionalInformationDAOImpl trainingAdditionalInformationDAOImpl;
+    private  PersonDAOImpl personDAOImpl;
 
-  @BeforeAll
-  static void beforeAll() {
+    @DisplayName("Запуск test container")
+    @BeforeAll
+    static void beforeAll() {
     postgres.start();
-  }
+    }
 
-  @AfterAll
-  static void afterAll() {
+    @DisplayName("Закрытие test container")
+    @AfterAll
+    static void afterAll() {
     postgres.stop();
-  }
+    }
 
-  @BeforeEach
-  void setUp() {
-      DatabaseService databaseService = new DatabaseService(   postgres.getJdbcUrl(),
-              postgres.getUsername(),
-              postgres.getPassword());
-    personDAOImpl = new PersonDAOImpl(databaseService);
-    trainingTypeDAOImpl = new TrainingTypeDAOImpl(databaseService);
-    trainingDAOImpl = new TrainingDAOImpl(databaseService);
-    trainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl(databaseService);
-  }
+    @DisplayName("Инииализация DAO-объектов, очистка всех таблиц перед выполнением тестов")
+    @BeforeEach
+    void setUp() {
+        DatabaseService databaseService = new DatabaseService(   postgres.getJdbcUrl(),
+        postgres.getUsername(),
+        postgres.getPassword());
 
-  @InjectMocks
-  private Person personTest = new Person(1,"personName", "1", ROLE_USER);
-  private TrainingType trainingTypeTest = new TrainingType(1, "TrainingType1");
+        personDAOImpl = new PersonDAOImpl(databaseService);
+        trainingTypeDAOImpl = new TrainingTypeDAOImpl(databaseService);
+        trainingDAOImpl = new TrainingDAOImpl(databaseService);
+        trainingAdditionalInformationDAOImpl = new TrainingAdditionalInformationDAOImpl(databaseService);
 
-  private TrainingAdditionalInformation trainingAdditionalInformation = new TrainingAdditionalInformation(1, "Key", "Value");
-  private Training trainingTest = new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"),  trainingTypeTest, 10, 1000); // mocking this class// mocking this class
+        trainingAdditionalInformationDAOImpl.deleteAll();
+        trainingDAOImpl.deleteAll();
+        personDAOImpl.deleteAll();
+        trainingTypeDAOImpl.deleteAll();
+    }
 
+    @InjectMocks
+    private Person personTest = new Person(1,"personName", "1", ROLE_USER);
+    private final TrainingType trainingTypeTest = new TrainingType(1, "TrainingType1");
+    private final TrainingAdditionalInformation trainingAdditionalInformation = new TrainingAdditionalInformation(1, "Key", "Value");
+    private final Training trainingTest = new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"),  trainingTypeTest, 10, 1000); // mocking this class// mocking this class
 
-  @Test
-  @Order(1)
-  public void shouldCreateTrainingTypeAndFindByName() {
-      trainingTypeDAOImpl.save(trainingTypeTest);
+    @DisplayName("Создание типа тренировки и поиск его по имени")
+    @Test
+    public void shouldCreateTrainingTypeAndFindByName() {
+        trainingTypeDAOImpl.save(trainingTypeTest);
 
-      Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
 
-      assertTrue(foundOptionalTrainingType.isPresent());
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
 
-      TrainingType foundTrainingType = foundOptionalTrainingType.get();
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
 
-      assertEquals("TrainingType1", foundTrainingType.getName());
-  }
+        assertThat(foundTrainingType.getName()).isEqualTo("TrainingType1");
+    }
 
-  @Test
-  @Order(2)
-  public void shouldCreatePersonAndFindByName() {
-      Person personTest = new Person(1,"personName", "1", ROLE_USER);
+    @DisplayName("Создание пользователя и поиск его по имени")
+    @Test
+    public void shouldCreatePersonAndFindByName() {
+        personDAOImpl.save(personTest);
 
-      personDAOImpl.save(personTest);
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
 
-      Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
 
-      assertTrue(foundOptionalPerson.isPresent());
+        Person foundPerson = foundOptionalPerson.get();
 
-      Person foundPerson = foundOptionalPerson.get();
+        assertThat(foundPerson.getName()).isEqualTo("personName");
+    }
 
-      assertEquals("personName", foundPerson.getName());
-  }
+    @DisplayName("Создание тренировки и поиск ее по id")
+    @Test
+    public void shouldCreateTrainingAndFindById() {
+        personDAOImpl.save(personTest);
 
-  @Test
-  @Order(3)
-  public void shouldCreateTrainingAndFindById() {
-      trainingTypeDAOImpl.save(trainingTypeTest);
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
 
-      trainingDAOImpl.save(trainingTest);
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
 
-      Optional<Training> foundOptionalTraining = trainingDAOImpl.findById(trainingTest.getId());
+        Person foundPerson = foundOptionalPerson.get();
 
-      assertTrue(foundOptionalTraining.isPresent());
+        trainingTypeDAOImpl.save(trainingTypeTest);
 
-      Training foundTraining = foundOptionalTraining.get();
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
 
-      assertEquals(java.sql.Date.valueOf("2021-01-01"), foundTraining.getDate());
-  }
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
 
-  @Test
-  @Order(4)
-  public void shouldCreateTrainingAdditionalInformationAndFindByTraining() {
-      trainingTypeDAOImpl.save(trainingTypeTest);
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
 
-      trainingDAOImpl.save(trainingTest);
+        Training trainingTest = new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"),  foundTrainingType, 10, 1000);
 
-      trainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, trainingTest);
+        trainingDAOImpl.save(trainingTest);
 
-      List<TrainingAdditionalInformation> foundTrainingAdditionalInformations = trainingAdditionalInformationDAOImpl.findByTraining(trainingTest);
+        List<Training> trainings = trainingDAOImpl.findAll();
 
-      assertTrue(foundTrainingAdditionalInformations.size() == 1);
+        assertThat(trainings.size()).isEqualTo(1);
 
-      assertEquals("Value", foundTrainingAdditionalInformations.get(0).getValue());
-  }
+        Optional<Training> foundOptionalTraining = trainingDAOImpl.findById(trainings.get(0).getId());
 
-  @Test
-  @Order(5)
-  void shouldGetTrainingTypes() {
-      List<TrainingType> trainingTypes = trainingTypeDAOImpl.findAll();
+        assertThat(foundOptionalTraining.isPresent()).isTrue();
 
-      assertEquals(3, trainingTypes.size());
-  }
+        Training foundTraining = foundOptionalTraining.get();
 
-  @Test
-  @Order(6)
-  void shouldGetTrainings() {
-      trainingTypeDAOImpl.save(trainingTypeTest);
+        assertThat(foundTraining.getDate()).isEqualTo(java.sql.Date.valueOf("2021-01-01"));
+        }
 
-      List<Training> trainings = trainingDAOImpl.findAll();
+    @DisplayName("Создание дополнительной информации о тренировке и поиск ее по тренировке")
+    @Test
+    public void shouldCreateTrainingAdditionalInformationAndFindByTraining() {
+        personDAOImpl.save(personTest);
 
-      assertEquals(2, trainings.size());
-  }
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
 
-  @Test
-  @Order(7)
-  void shouldGetTrainingsByPerson() {
-      Person personTest = new Person(1,"personName5", "1", ROLE_USER);
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
 
-      personDAOImpl.save(personTest);
+        Person foundPerson = foundOptionalPerson.get();
 
-      Person personTest2 = new Person(2, "personName6", "1", ROLE_USER);
+        trainingTypeDAOImpl.save(trainingTypeTest);
 
-      personDAOImpl.save(personTest2);
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
 
-      trainingTypeDAOImpl.save(trainingTypeTest);
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
 
-      trainingDAOImpl.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
-      trainingDAOImpl.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
-      trainingDAOImpl.save(new Training(3, personTest2, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
 
+        Training trainingTest = new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"),  foundTrainingType, 10, 1000);
 
-      List<Training> trainings = trainingDAOImpl.findByPerson(personTest2);
-      assertEquals(1, trainings.size());
-  }
+        trainingDAOImpl.save(trainingTest);
 
-  @Test
-  @Order(8)
-  void shouldGetTrainingPersonAndTrainingTypeAndDate() {
-      Person personTest = new Person(1,"personName7", "1", ROLE_USER);
+        Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(foundPerson, foundTrainingType, java.sql.Date.valueOf("2021-01-01"));
 
-      personDAOImpl.save(personTest);
+        assertThat(foundOptionalTraining.isPresent()).isTrue();
 
-      trainingTypeDAOImpl.save(trainingTypeTest);
+        Training foundTraining = foundOptionalTraining.get();
 
-      trainingDAOImpl.save(new Training(1, personTest, java.sql.Date.valueOf("2021-01-01"), trainingTypeTest, 10, 1000));
-      trainingDAOImpl.save(new Training(2, personTest, java.sql.Date.valueOf("2021-01-02"), trainingTypeTest, 20, 2000));
+        trainingAdditionalInformationDAOImpl.save(trainingAdditionalInformation, foundTraining);
 
-      Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
+        List<TrainingAdditionalInformation> foundTrainingAdditionalInformations = trainingAdditionalInformationDAOImpl.findByTraining(foundTraining);
 
-      assertTrue(foundOptionalTraining.isPresent());
+        assertThat(foundTrainingAdditionalInformations.size()).isEqualTo(1);
 
-      Training foundTraining = foundOptionalTraining.get();
+        assertThat(foundTrainingAdditionalInformations.get(0).getValue()).isEqualTo("Value");
+    }
 
-      assertEquals(1000, foundTraining.getAmountOfCalories());
-  }
+    @DisplayName("Получение типов тренировок")
+    @Test
+    void shouldGetTrainingTypes() {
+        trainingTypeDAOImpl.save(new TrainingType(1, "trainingTypeTest"));
+        trainingTypeDAOImpl.save(new TrainingType(2, "trainingTypeTest2"));
 
-  @Test
-  @Order(9)
-  public void shouldUpdateTrainingAndFindById() {
-      Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(personTest, trainingTypeTest, java.sql.Date.valueOf("2021-01-01"));
+        List<TrainingType> trainingTypes = trainingTypeDAOImpl.findAll();
 
-      assertTrue(foundOptionalTraining.isPresent());
+        assertThat(trainingTypes.size()).isEqualTo(2);
+    }
 
-      Training foundTraining = foundOptionalTraining.get();
+    @DisplayName("Получение тренировок")
+    @Test
+    void shouldGetTrainings() {
+        personDAOImpl.save(personTest);
 
-      assertEquals(1000, foundTraining.getAmountOfCalories());
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
 
-      foundTraining.setAmountOfCalories(2000);
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
 
-      trainingDAOImpl.update(foundTraining.getId(), foundTraining);
+        Person foundPerson = foundOptionalPerson.get();
 
-      Optional<Training> foundOptionalTraining2 = trainingDAOImpl.findById(foundTraining.getId());
+        trainingTypeDAOImpl.save(trainingTypeTest);
 
-      assertTrue(foundOptionalTraining2.isPresent());
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
 
-      Training foundTraining2 = foundOptionalTraining2.get();
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
 
-      assertEquals(2000, foundTraining2.getAmountOfCalories());
-  }
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
 
-  @Test
-  @Order(10)
-  void shouldDeleteTrainingById() {
-      List<Training> trainings = trainingDAOImpl.findAll();
+        trainingDAOImpl.save(new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"), foundTrainingType, 10, 1000));
+        trainingDAOImpl.save(new Training(2, foundPerson, java.sql.Date.valueOf("2021-01-02"), foundTrainingType, 20, 2000));
 
-      assertEquals(7, trainings.size());
+        List<Training> trainings = trainingDAOImpl.findAll();
 
-      trainingDAOImpl.delete(trainings.get(0).getId());
+        assertThat(trainings.size()).isEqualTo(2);
+    }
 
-      List<Training> trainings2 = trainingDAOImpl.findAll();
+    @DisplayName("Получение тренировок")
+    @Test
+    void shouldGetTrainingsByPerson() {
+        Person personTest = new Person(1,"personName5", "1", ROLE_USER);
 
-      assertEquals(6, trainings2.size());
-  }
+        personDAOImpl.save(personTest);
+
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
+
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
+
+        Person foundPerson = foundOptionalPerson.get();
+
+        Person personTest2 = new Person(2, "personName6", "1", ROLE_USER);
+
+        personDAOImpl.save(personTest2);
+
+        Optional<Person> foundOptionalPerson2 = personDAOImpl.findByName(personTest2.getName());
+
+        assertThat(foundOptionalPerson2.isPresent()).isTrue();
+
+        Person foundPerson2 = foundOptionalPerson2.get();
+
+        trainingTypeDAOImpl.save(trainingTypeTest);
+
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
+
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
+
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
+
+        trainingDAOImpl.save(new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"), foundTrainingType, 10, 1000));
+        trainingDAOImpl.save(new Training(2, foundPerson, java.sql.Date.valueOf("2021-01-02"), foundTrainingType, 20, 2000));
+        trainingDAOImpl.save(new Training(3, foundPerson2, java.sql.Date.valueOf("2021-01-02"), foundTrainingType, 20, 2000));
+
+        List<Training> trainings = trainingDAOImpl.findByPerson(foundPerson2);
+
+        assertThat(trainings.size()).isEqualTo(1);
+    }
+
+    @DisplayName("Получение тренировок по пользователю, типу тренировки и дате")
+    @Test
+    void shouldGetTrainingPersonAndTrainingTypeAndDate() {
+        personDAOImpl.save(personTest);
+
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
+
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
+
+        Person foundPerson = foundOptionalPerson.get();
+
+        trainingTypeDAOImpl.save(trainingTypeTest);
+
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
+
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
+
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
+
+        trainingDAOImpl.save(new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"), foundTrainingType, 10, 1000));
+        trainingDAOImpl.save(new Training(2, foundPerson, java.sql.Date.valueOf("2021-01-02"), foundTrainingType, 20, 2000));
+
+        Optional<Training> foundOptionalTraining = trainingDAOImpl.findByPersonAndTrainingTypeAndDate(foundPerson, foundTrainingType, java.sql.Date.valueOf("2021-01-01"));
+
+        assertThat(foundOptionalTraining.isPresent()).isTrue();
+
+        Training foundTraining = foundOptionalTraining.get();
+
+        assertThat(foundTraining.getAmountOfCalories()).isEqualTo(1000);
+    }
+
+    @DisplayName("Обновление тренировки и поиск ее по id")
+    @Test
+    public void shouldUpdateTrainingAndFindById() {
+        personDAOImpl.save(personTest);
+
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
+
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
+
+        Person foundPerson = foundOptionalPerson.get();
+
+        trainingTypeDAOImpl.save(trainingTypeTest);
+
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
+
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
+
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
+
+        Training trainingTest = new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"),  foundTrainingType, 10, 1000);
+
+        trainingDAOImpl.save(trainingTest);
+
+        List<Training> trainings = trainingDAOImpl.findAll();
+
+        assertThat(trainings.size()).isEqualTo(1);
+
+        Optional<Training> foundOptionalTraining = trainingDAOImpl.findById(trainings.get(0).getId());
+
+        assertThat(foundOptionalTraining.isPresent()).isTrue();
+
+        Training foundTraining = foundOptionalTraining.get();
+
+        assertThat(foundTraining.getAmountOfCalories()).isEqualTo(1000);
+
+        foundTraining.setAmountOfCalories(2000);
+
+        trainingDAOImpl.update(foundTraining.getId(), foundTraining);
+
+        Optional<Training> foundOptionalTraining2 = trainingDAOImpl.findById(foundTraining.getId());
+
+        assertThat(foundOptionalTraining2.isPresent()).isTrue();
+
+        Training foundTraining2 = foundOptionalTraining2.get();
+
+        assertThat(foundTraining2.getAmountOfCalories()).isEqualTo(2000);
+    }
+
+    @DisplayName("Удаление тренировки по id")
+    @Test
+    void shouldDeleteTrainingById() {
+        personDAOImpl.save(personTest);
+
+        Optional<Person> foundOptionalPerson = personDAOImpl.findByName(personTest.getName());
+
+        assertThat(foundOptionalPerson.isPresent()).isTrue();
+
+        Person foundPerson = foundOptionalPerson.get();
+
+        trainingTypeDAOImpl.save(trainingTypeTest);
+
+        Optional<TrainingType> foundOptionalTrainingType = trainingTypeDAOImpl.findByName(trainingTypeTest.getName());
+
+        assertThat(foundOptionalTrainingType.isPresent()).isTrue();
+
+        TrainingType foundTrainingType = foundOptionalTrainingType.get();
+
+        trainingDAOImpl.save(new Training(1, foundPerson, java.sql.Date.valueOf("2021-01-01"), foundTrainingType, 10, 1000));
+        trainingDAOImpl.save(new Training(2, foundPerson, java.sql.Date.valueOf("2021-01-02"), foundTrainingType, 20, 2000));
+
+        List<Training> trainings = trainingDAOImpl.findAll();
+
+        assertThat(trainings.size()).isEqualTo(2);
+
+        trainingDAOImpl.delete(trainings.get(0).getId());
+
+        List<Training> trainings2 = trainingDAOImpl.findAll();
+
+        assertThat(trainings2.size()).isEqualTo(1);
+    }
 
 }

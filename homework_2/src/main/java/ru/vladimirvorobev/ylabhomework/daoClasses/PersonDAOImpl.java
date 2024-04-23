@@ -13,7 +13,7 @@ import static ru.vladimirvorobev.ylabhomework.dataBase.SQLQueryConstants.*;
  **/
 public class PersonDAOImpl implements PersonDAO {
 
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
     public PersonDAOImpl(DatabaseService databaseService) {
         this.databaseService = databaseService;
@@ -25,6 +25,7 @@ public class PersonDAOImpl implements PersonDAO {
      * @param name имя пользователя
      * @return пользователь
      **/
+    @Override
     public Optional<Person> findByName(String name) {
         try (Connection connection = databaseService.connect()){
             String query = GET_PERSON_BY_NAME;
@@ -58,6 +59,7 @@ public class PersonDAOImpl implements PersonDAO {
      *
      * @param person пользователь
      **/
+    @Override
     public void save(Person person) {
         try (Connection connection = databaseService.connect()){
             String query = SAVE_PERSON;
@@ -67,6 +69,23 @@ public class PersonDAOImpl implements PersonDAO {
             preparedStatement.setString(1, person.getName());
             preparedStatement.setString(2, person.getPassword());
             preparedStatement.setString(3, person.getRole().toString());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Удаление всех пользователей.
+     *
+     **/
+    @Override
+    public void deleteAll() {
+        try (Connection connection = databaseService.connect()){
+            String query = DELETE_ALL_PERSONS;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
