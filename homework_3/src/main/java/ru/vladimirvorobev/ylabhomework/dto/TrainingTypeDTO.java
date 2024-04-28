@@ -8,10 +8,7 @@ import lombok.Setter;
 /**
  * DTO типа тренировкок.
  **/
-/*@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor*/
+
 public class TrainingTypeDTO {
 
     private String name;

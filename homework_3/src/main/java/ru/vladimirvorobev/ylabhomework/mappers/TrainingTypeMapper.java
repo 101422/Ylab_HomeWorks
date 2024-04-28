@@ -11,10 +11,6 @@ import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TrainingTypeMapper {
 
-   /* @Mapping(target = "name", source = "name")
-    TrainingTypeDTO trainingTypeToTrainingTypeDTO(TrainingType trainingType);*/
-
-
     TrainingTypeDTO trainingTypeToTrainingTypeDTO(TrainingType trainingType);
     TrainingType trainingTypeDTOToTrainingType(TrainingTypeDTO trainingTypeDTO);
 

@@ -17,19 +17,13 @@ import java.util.List;
 @NoArgsConstructor*/
 public class TrainingDTO {
 
-    private int id;
     private String personName;
     private String trainingTypeName;
     private Date date;
     private int duration;
     private int amountOfCalories;
     private List<TrainingAdditionalInformationDTO> trainingAdditionalInformation;
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+
     public String getPersonName() {
         return personName;
     }
@@ -70,8 +64,7 @@ public class TrainingDTO {
         this.trainingAdditionalInformation = trainingAdditionalInformation;
     }
 
-    public TrainingDTO(int id, String personName, String trainingTypeName, Date date, int duration, int amountOfCalories, List<TrainingAdditionalInformationDTO> trainingAdditionalInformation) {
-        this.id = id;
+    public TrainingDTO(String personName, String trainingTypeName, Date date, int duration, int amountOfCalories, List<TrainingAdditionalInformationDTO> trainingAdditionalInformation) {
         this.personName = personName;
         this.trainingTypeName = trainingTypeName;
         this.date = date;

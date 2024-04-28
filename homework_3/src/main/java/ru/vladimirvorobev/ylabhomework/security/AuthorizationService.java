@@ -1,5 +1,6 @@
 package ru.vladimirvorobev.ylabhomework.security;
 
+import ru.vladimirvorobev.ylabhomework.annotations.AuthorizationLoggable;
 import ru.vladimirvorobev.ylabhomework.daoClasses.PersonDAOImpl;
 import ru.vladimirvorobev.ylabhomework.dataBase.DatabaseService;
 import ru.vladimirvorobev.ylabhomework.models.Person;
@@ -14,6 +15,7 @@ import java.util.Properties;
 /**
  * Сервис авторизации пользователя.
  **/
+//@AuthorizationLoggable
 public class AuthorizationService {
 
     private PersonDAOImpl personDAOImpl;
@@ -49,7 +51,7 @@ public class AuthorizationService {
      * @param password пароль
      * @return HashMap с данными о полномочиях пользователя, состоит из пар: авторизован - булево, это админ - булево.
      **/
-
+    @AuthorizationLoggable
     public HashMap<String, Boolean> login(String name, String password) {
         Optional<Person> optionalPerson = personDAOImpl.findByName(name);
 

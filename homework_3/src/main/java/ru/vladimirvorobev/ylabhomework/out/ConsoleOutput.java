@@ -1,5 +1,6 @@
 package ru.vladimirvorobev.ylabhomework.out;
 
+import ru.vladimirvorobev.ylabhomework.annotations.TrainingGettingStatsLoggable;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.services.TrainingService;
 import java.util.Date;
@@ -183,6 +184,7 @@ public class ConsoleOutput {
      * @param mapOfTrainingsByPersonName результат группировки тренировок по дате.
      *
      **/
+    @TrainingGettingStatsLoggable
     public void printStats(Map<Date, List<Training>> mapOfTrainingsByPersonName) {
         mapOfTrainingsByPersonName.forEach((key, value) ->
                 System.out.println(key + " - " +  value.stream().mapToInt(Training::getAmountOfCalories).sum()+ " calories"));

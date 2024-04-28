@@ -20,6 +20,7 @@ import ru.vladimirvorobev.ylabhomework.util.TrainingTypeValidator;
 import ru.vladimirvorobev.ylabhomework.util.TrainingValidator;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,14 +48,21 @@ public class TrainingDeleteServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
         String name = request.getParameter("name");
         String password = request.getParameter("password");
-        int trainingId = Integer.parseInt(request.getParameter("id"));
+        Date date = java.sql.Date.valueOf(request.getParameter("date"));
+        String trainingTypeName = request.getParameter("trainingType");
 
         HashMap<String, Boolean> credentials = authorizationService.login(name, password);
 
         if (credentials.get("isAuthorized")) {
-            trainingService.deleteTraining(trainingId);
 
-            response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            if (date == null || trainingTypeName.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            else {
+                trainingService.deleteTrainingByPersonTypeDate(name, trainingTypeName, date);
+
+                response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            }
         }
         else
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

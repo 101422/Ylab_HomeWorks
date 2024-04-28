@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.mapstruct.factory.Mappers;
+import ru.vladimirvorobev.ylabhomework.annotations.TrainingGettingStatsLoggable;
 import ru.vladimirvorobev.ylabhomework.dto.*;
 import ru.vladimirvorobev.ylabhomework.mappers.TrainingAdditionalInformationMapper;
 import ru.vladimirvorobev.ylabhomework.mappers.TrainingMapper;
@@ -46,6 +47,7 @@ public class StatsServlet extends HttpServlet {
      * @param request Запрос
      * @param response Ответ
      **/
+    @TrainingGettingStatsLoggable
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");

@@ -1,8 +1,5 @@
 package ru.vladimirvorobev.ylabhomework.in;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import ru.vladimirvorobev.ylabhomework.Main;
 import ru.vladimirvorobev.ylabhomework.models.Training;
 import ru.vladimirvorobev.ylabhomework.out.ConsoleOutput;
 import ru.vladimirvorobev.ylabhomework.security.AuthorizationService;
@@ -15,18 +12,20 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * Ввод данных из консоли.
  **/
+//@Loggable
 public class ConsoleInput {
-    final static Logger logger = LogManager.getLogger(Main.class);
+   // final static Logger logger = LogManager.getLogger(Main.class);
 
     /**
     * Ввод данных из консоли.
     **/
+    //@Loggable
     public void input() throws InstantiationException, IllegalAccessException, IOException {
         AuthorizationService authorizationService = new AuthorizationService();
         TrainingService trainingService = new TrainingService();
         ConsoleOutput consoleOutput = new ConsoleOutput();
 
-        logger.info("App started");
+        //logger.info("App started");
 
         while (true) {
             consoleOutput.greeiting();
@@ -63,7 +62,7 @@ public class ConsoleInput {
                 boolean isAuthorized = authorizationService.login(name, password).get("isAuthorized");
                 boolean isAdmin      = authorizationService.login(name, password).get("isAdmin");
 
-                logger.info("User " + name + " authorized");
+//                logger.info("User " + name + " authorized");
 
                 if (isAuthorized)
                     while (true) {
@@ -141,7 +140,7 @@ public class ConsoleInput {
 
                             trainingService.createTraining(name, java.sql.Date.valueOf(dateString), trainingTypeName, duration, amountOfCalories, additionalInformation);
 
-                            logger.info("Created new training by user " + name);
+//                            logger.info("Created new training by user " + name);
 
                         }
                         else if (enteredString2.equals("trainings")) {
@@ -231,7 +230,7 @@ public class ConsoleInput {
                             }
                             trainingService.updateTraining(id, name, java.sql.Date.valueOf(dateString), trainingTypeName, duration, amountOfCalories, additionalInformation);
 
-                            logger.info("Edited training by user " + name);
+//                            logger.info("Edited training by user " + name);
                         }
                         else if (enteredString2.equals("delete")) {
                             // Удаление тренировки. Отображение всех тренировок пользователя и последующее удаление по id.
@@ -248,7 +247,7 @@ public class ConsoleInput {
 
                             trainingService.deleteTraining(id);
 
-                            logger.info("Deleted training by user " + name);
+//                            logger.info("Deleted training by user " + name);
                         }
                         else if (enteredString2.equals("stats")) {
                             // Отображение статистики.
@@ -264,7 +263,7 @@ public class ConsoleInput {
 
                             consoleOutput.printStats(mapOfTrainingsByPersonName);
 
-                            logger.info("Showed stats of user " + name);
+//                            logger.info("Showed stats of user " + name);
                         }
                         else
                             break;
@@ -273,7 +272,7 @@ public class ConsoleInput {
             else
                 break;
         }
-        logger.info("App finished");
+//        logger.info("App finished");
     }
 
 }

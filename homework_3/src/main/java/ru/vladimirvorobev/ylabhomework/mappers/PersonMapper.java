@@ -10,10 +10,6 @@ import ru.vladimirvorobev.ylabhomework.models.TrainingType;
 @Mapper
 public interface PersonMapper {
 
-/*    @Mapping(target = "name", source = "name")
-    @Mapping(target = "password", source = "password")
-    PersonDTO personToPersonDTO(Person person);*/
-
     PersonDTO personToPersonDTO(Person person);
     Person personDTOToPerson(PersonDTO personDTO);
 
