@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="001-create-table.xml" author="vladimirvorobev">
+        <sql>CREATE SCHEMA entities</sql>
+        <sql>CREATE SCHEMA util</sql>
+
+        <createSequence sequenceName="person_id_autoincrement" dataType="int"
+        incrementBy="1" startValue="1" />
+        <createSequence sequenceName="training_id_autoincrement" dataType="int"
+                        incrementBy="1" startValue="1" />
+        <createSequence sequenceName="training_additional_information_id_autoincrement" dataType="int"
+                        incrementBy="1" startValue="1" />
+        <createSequence sequenceName="training_type_id_autoincrement" dataType="int"
+                        incrementBy="1" startValue="1" />
+
+        <createTable schemaName="entities" tableName="person" remarks="Table of persons">
+            <column name="id" type="bigint" remarks="id of a person">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)" remarks="Name of a person">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)" remarks="Password of a person">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(255)"  remarks="Role of a person">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable schemaName="util" tableName="training_type" remarks="Table of training types">
+            <column name="id" type="bigint" remarks="id of a training type">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)" remarks="Name of a training type">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <createTable schemaName="entities" tableName="training" remarks="Table of trainings">
+            <column name="id" type="bigint" remarks="id of a training">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="date" type="date" remarks="Date of a training">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration" type="integer" remarks="Duration of a training">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount_of_calories" type="integer" remarks="Amount of burnt calories of a training">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_id" type="integer" remarks="Reference to id of a person">
+                <constraints foreignKeyName="fk_training_person" references="entities.person(id)" />
+            </column>
+            <column name="training_type_id" type="integer" remarks="Reference to id of a training type">
+                <constraints foreignKeyName="fk_training_training_type" references="util.training_type(id)"/>
+            </column>
+        </createTable>
+
+        <createTable schemaName="util" tableName="training_additional_information"  remarks="Table of additional information about trainings">
+            <column name="id" type="bigint" remarks="id of an additional information about training">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="key" type="varchar(255)" remarks="Key field of an additional information about training">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)" remarks="Value field of an additional information about training">
+                <constraints nullable="false"/>
+            </column>
+            <column name="training_id" type="integer" remarks="Reference to id of a training">
+<!--                <constraints foreignKeyName="fk_training_additional_information_training" references="entities.training(id)"/>-->
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableSchemaName="util" baseTableName="training_additional_information" baseColumnNames="training_id"
+                                 constraintName="fk_training_additional_information_training"
+                                 referencedTableSchemaName="entities" referencedTableName="training" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+    </changeSet>      
+
+</databaseChangeLog>
