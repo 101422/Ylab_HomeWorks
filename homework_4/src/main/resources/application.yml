@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/ylab_task2_db
+    username: postgres2
+    password: postgres2
+db:
+  changelog_file: db/changelog/changelog.xml
+springdoc:
+  version: '@springdoc.version@'
+  api-docs:
+    enabled: true
+    path: /api-docs/**
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
