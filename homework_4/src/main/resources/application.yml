@@ -5,7 +5,7 @@ spring:
     username: postgres2
     password: postgres2
 db:
-  changelog_file: db/changelog/changelog.xml
+  changelog_file: db/changelog/db.changelog-master.yml
 springdoc:
   version: '@springdoc.version@'
   api-docs:

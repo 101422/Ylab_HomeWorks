@@ -77,7 +77,7 @@ public class UnitTest extends Mockito {
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-            Liquibase liquibase = new Liquibase("db/changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.yml", new ClassLoaderResourceAccessor(), database);
 
             liquibase.update();
         } catch (SQLException | DatabaseException e) {

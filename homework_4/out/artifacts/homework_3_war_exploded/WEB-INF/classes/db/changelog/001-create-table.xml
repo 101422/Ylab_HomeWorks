@@ -39,7 +39,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)" remarks="Name of a training type">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -83,19 +83,6 @@
                                  constraintName="fk_training_additional_information_training"
                                  referencedTableSchemaName="entities" referencedTableName="training" referencedColumnNames="id"
                                  onDelete="SET NULL"/>
-
-
-        <createTable schemaName="util" tableName="audit_info" remarks="Table of audit information">
-            <column name="id" type="bigint" remarks="id of an event">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="event" type="varchar(255)" remarks="Event to audit">
-                <constraints nullable="false"/>
-            </column>
-            <column name="timestamp" type="timestamp" remarks="Timestamp of an event">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
     </changeSet>      
 
 </databaseChangeLog>

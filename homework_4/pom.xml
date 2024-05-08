@@ -7,7 +7,7 @@
     <groupId>ru.vladimirvorobevylabhomework</groupId>
     <artifactId>homework_4</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
