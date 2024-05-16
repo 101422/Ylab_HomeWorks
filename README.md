@@ -9,3 +9,5 @@
 [ДЗ №3](https://github.com/101422/Ylab_HomeWorks/pull/4/files)
 
 [ДЗ №4](https://github.com/101422/Ylab_HomeWorks/pull/5/files)
+
+[ДЗ №5](https://github.com/101422/Ylab_HomeWorks/pull/6/files)
