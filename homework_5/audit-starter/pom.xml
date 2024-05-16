@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.vladimirvorobevylabhomework</groupId>
+    <artifactId>audit-starter</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>audit-starter</name>
+
+    <parent>
+        <groupId>ru.vladimirvorobev.ylabhomework</groupId>
+        <artifactId>homework_5</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.vladimirvorobevylabhomework</groupId>
+            <artifactId>audit</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.vladimirvorobevylabhomework</groupId>
+            <artifactId>autoconfig</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <greeter.version>0.0.1-SNAPSHOT</greeter.version>
+        <spring-boot.version>3.2.5</spring-boot.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <java.version>17</java.version>
+        <spring-boot-maven-plugin.version>3.1.5</spring-boot-maven-plugin.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>
