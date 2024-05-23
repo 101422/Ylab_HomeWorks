@@ -1,0 +1,209 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  001-create-table
+       author:  vladimirvorobev
+       changes:
+         -  sql:
+              sql: CREATE SCHEMA entities
+         -  sql:
+              sql: CREATE SCHEMA util
+
+         -  createSequence:
+              sequenceName:  person_id_autoincrement
+              dataType:  int
+              startValue:  1
+              incrementBy:  1
+         -  createSequence:
+              sequenceName: training_id_autoincrement
+              dataType: int
+              startValue: 1
+              incrementBy: 1
+         -  createSequence:
+              sequenceName: training_additional_information_id_autoincrement
+              dataType: int
+              startValue: 1
+              incrementBy: 1
+         -  createSequence:
+             sequenceName: training_type_id_autoincrement
+             dataType: int
+             startValue: 1
+             incrementBy: 1
+
+         - createTable:
+             schemaName: entities
+             tableName: person
+             remarks: Table of persons
+             columns:
+               - column:
+                   name: id
+                   type: bigint
+                   remarks: id of a person
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: name
+                   type: varchar(255)
+                   remarks: Name of a person
+                   constraints:
+                     nullable: false
+                     unique: true
+               - column:
+                   name: password
+                   type: varchar(255)
+                   remarks: Password of a person
+                   constraints:
+                     nullable: false
+               - column:
+                   name: role
+                   type: varchar(255)
+                   remarks: Role of a person
+                   constraints:
+                     nullable: false
+         - createTable:
+             schemaName: util
+             tableName: training_type
+             remarks: Table of training types
+             columns:
+               - column:
+                   name: id
+                   type: bigint
+                   remarks: id of a training type
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: name
+                   type: varchar(255)
+                   remarks: Name of a training type
+                   constraints:
+                     nullable: false
+                     unique: true
+         - createTable:
+             schemaName: entities
+             tableName: training
+             remarks: Table of trainings
+             columns:
+               - column:
+                   name: id
+                   type: bigint
+                   remarks: id of a training
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: date
+                   type: date
+                   remarks: Date of a training
+                   constraints:
+                     nullable: false
+               - column:
+                   name: duration
+                   type: integer
+                   remarks: Duration of a training
+                   constraints:
+                     nullable: false
+               - column:
+                   name: amount_of_calories
+                   type: integer
+                   remarks: Amount of burnt calories of a training
+                   constraints:
+                     nullable: false
+               - column:
+                   name: person_id
+                   type: integer
+                   remarks: Reference to id of a person
+                   constraints:
+                     foreignKeyName: fk_training_person
+                     references: entities.person(id)
+               - column:
+                   name: training_type_id
+                   type: integer
+                   remarks: Reference to id of a training type
+                   constraints:
+                     foreignKeyName: fk_training_training_type
+                     references: util.training_type(id)
+         - createTable:
+             schemaName: util
+             tableName: training_additional_information
+             remarks: Table of additional information about trainings
+             columns:
+               - column:
+                   name: id
+                   type: bigint
+                   remarks: id of an additional information about training
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: key
+                   type: varchar(255)
+                   remarks: Key field of an additional information about training
+                   constraints:
+                     nullable: false
+               - column:
+                   name: value
+                   type: varchar(255)
+                   remarks: Value field of an additional information about training
+                   constraints:
+                     nullable: false
+               - column:
+                   name: training_id
+                   type: integer
+                   remarks: Reference to id of a training
+
+         - addForeignKeyConstraint:
+             baseTableSchemaName: util
+             baseTableName: training_additional_information
+             baseColumnNames: training_id
+             constraintName: fk_training_additional_information_training
+             referencedTableSchemaName: entities
+             referencedTableName: training
+             referencedColumnNames: id
+             onDelete: SET NULL
+
+         - createTable:
+             schemaName: util
+             tableName: audit_info
+             remarks: Table of audit information
+             columns:
+               - column:
+                   name: id
+                   type: bigint
+                   remarks: id of an an event
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: event
+                   type: varchar(255)
+                   remarks: Event to audit
+                   constraints:
+                     nullable: false
+               - column:
+                   name: timestamp
+                   type: timestamp
+                   remarks: Timestamp of an event
+                   constraints:
+                     nullable: false
+                     unique: true
+  -  changeSet:
+       id:  002-insert-data
+       author:  vladimirvorobev
+       changes:
+         - insert:
+             schemaName: entities
+             tableName: person
+             columns:
+               - column:
+                   name: id
+                   valueComputed: nextval('person_id_autoincrement')
+               - column:
+                   name: name
+                   value: admin
+               - column:
+                   name: password
+                   value: admin
+               - column:
+                   name: role
+                   value: ADMIN
